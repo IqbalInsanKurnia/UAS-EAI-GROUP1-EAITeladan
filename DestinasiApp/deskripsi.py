@@ -9,11 +9,11 @@ import base64
 app = Flask(__name__)
 
 # MySQL configuration
-app.config['MYSQL_HOST'] = 'localhost'
-app.config['MYSQL_PORT'] = 3308
-app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = ''
-app.config['MYSQL_DB'] = 'uts_eaiteladan_destinasi'
+app.config['MYSQL_HOST'] = 'mysql-d48e9f6-bal-start.l.aivencloud.com'
+app.config['MYSQL_PORT'] = 14160
+app.config['MYSQL_USER'] = 'avnadmin'
+app.config['MYSQL_PASSWORD'] = 'AVNS_HyawaTvSffYugyllPGf'
+app.config['MYSQL_DB'] = 'destinasi'
 mysql = MySQL(app)
 
 # Function to generate timestamp
@@ -83,6 +83,32 @@ def add_destinasi():
         return response
     else:
         return jsonify({'message': 'Method not allowed'}), 405  # Method Not Allowed
+
+@app.route('/destinasi/update/<id_perjalanan>', methods=['PUT'])
+def update_destinasi(id_perjalanan):
+    if request.method == 'PUT':
+        # Mengambil data dari permintaan POST
+        tanggal_keberangkatan = request.form['tanggal_keberangkatan']
+        kota_asal = request.form['kota_asal']
+        kota_tujuan = request.form['kota_tujuan']
+        
+        # Menyimpan data gambar dari permintaan
+        foto_tujuan = request.files['foto_tujuan'].read()
+        
+        # Menyimpan data ke dalam database
+        cursor = mysql.connection.cursor()
+        cursor.execute("UPDATE destinasi SET tanggal_keberangkatan = %s, kota_asal = %s, kota_tujuan = %s, foto_tujuan = %s WHERE id_perjalanan = %s", (tanggal_keberangkatan, kota_asal, kota_tujuan, foto_tujuan, id_perjalanan))
+        mysql.connection.commit()
+        cursor.close()
+        
+        # Menyusun respons
+        timestamp = generate_timestamp()
+        response = jsonify({'timestamp': timestamp, 'message': 'Data destinasi berhasil diupdate'})
+        response.status_code = 201  # Created
+        return response
+    else:
+        return jsonify({'message': 'Method not allowed'}), 405  # Method Not Allowed
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

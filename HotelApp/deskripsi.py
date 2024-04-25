@@ -8,11 +8,11 @@ import base64
 app = Flask(__name__)
 
 # MySQL configuration
-app.config['MYSQL_HOST'] = 'localhost'
-app.config['MYSQL_PORT'] = 3308
-app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = ''
-app.config['MYSQL_DB'] = 'uts_eaiteladan_hotel'
+app.config['MYSQL_HOST'] = 'mysql-d48e9f6-bal-start.l.aivencloud.com'
+app.config['MYSQL_PORT'] = 14160
+app.config['MYSQL_USER'] = 'avnadmin'
+app.config['MYSQL_PASSWORD'] = 'AVNS_HyawaTvSffYugyllPGf'
+app.config['MYSQL_DB'] = 'hotel'
 mysql = MySQL(app)
 
 # Function to generate timestamp
@@ -28,7 +28,7 @@ def get_all_destinasi():
     for row in cursor.fetchall():
         # Convert BLOB image data to base64 encoded string
         row_data = list(row)
-        row_data[columns.index('foto_hotel')] = base64.b64encode(row_data[columns.index('foto_tujuan')]).decode('utf-8')
+        row_data[columns.index('foto_hotel')] = base64.b64encode(row_data[columns.index('foto_hotel')]).decode('utf-8')
         data.append(dict(zip(columns, row_data)))
     cursor.close()
     timestamp = generate_timestamp()
@@ -59,6 +59,30 @@ def add_hotel():
     else:
         return jsonify({'message': 'Method not allowed'}), 405  # Method Not Allowed
 
+
+@app.route('/hotel/update/<id_hotel>', methods=['PUT'])
+def update_hotel(id_hotel):
+    if request.method == 'PUT':
+        # Mengambil data dari permintaan POST
+        lokasi_hotel = request.form['lokasi_hotel']
+        harga_sewa = request.form['harga_sewa']
+        
+        # Menyimpan data gambar dari permintaan
+        foto_hotel = request.files['foto_hotel'].read()
+        
+        # Menyimpan data ke dalam database
+        cursor = mysql.connection.cursor()
+        cursor.execute("UPDATE hotel SET lokasi_hotel = %s, harga_sewa = %s, foto_hotel = %s WHERE id_hotel = %s", (lokasi_hotel, harga_sewa, foto_hotel, id_hotel))
+        mysql.connection.commit()
+        cursor.close()
+        
+        # Menyusun respons
+        timestamp = generate_timestamp()
+        response = jsonify({'timestamp': timestamp, 'message': 'Data hotel berhasil diupdate'})
+        response.status_code = 201  # Created
+        return response
+    else:
+        return jsonify({'message': 'Method not allowed'}), 405  # Method Not Allowed
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001, debug=True)
