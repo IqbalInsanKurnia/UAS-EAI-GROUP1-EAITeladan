@@ -47,7 +47,7 @@ def get_all_hotel():
     return jsonify({'timestamp': timestamp, 'data': data})
 
 @app.route('/hotel/<paket_id>', methods=['GET'])
-def get_hotel_by_id(paket_id):
+def get_hotel_by_paket_id(paket_id):
     cursor = mysql.connection.cursor()
     cursor.execute("SELECT * FROM hotel.hotel WHERE paket_id = %s", (paket_id,))
     columns = [i[0] for i in cursor.description]
