@@ -19,17 +19,41 @@ mysql = MySQL(app)
 def generate_timestamp():
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
+# @app.route('/hotel', methods=['GET'])
+# def get_all_destinasi():
+#     cursor = mysql.connection.cursor()
+#     cursor.execute("SELECT * FROM hotel")
+#     columns = [i[0] for i in cursor.description]
+#     data = []
+#     for row in cursor.fetchall():
+#         # Convert BLOB image data to base64 encoded string
+#         row_data = list(row)
+#         row_data[columns.index('foto_hotel')] = base64.b64encode(row_data[columns.index('foto_hotel')]).decode('utf-8')
+#         data.append(dict(zip(columns, row_data)))
+#     cursor.close()
+#     timestamp = generate_timestamp()
+#     return jsonify({'timestamp': timestamp, 'data': data})
+
 @app.route('/hotel', methods=['GET'])
-def get_all_destinasi():
+def get_all_hotel():
     cursor = mysql.connection.cursor()
     cursor.execute("SELECT * FROM hotel")
     columns = [i[0] for i in cursor.description]
     data = []
     for row in cursor.fetchall():
-        # Convert BLOB image data to base64 encoded string
-        row_data = list(row)
-        row_data[columns.index('foto_hotel')] = base64.b64encode(row_data[columns.index('foto_hotel')]).decode('utf-8')
-        data.append(dict(zip(columns, row_data)))
+        data.append(dict(zip(columns, row)))
+    cursor.close()
+    timestamp = generate_timestamp()
+    return jsonify({'timestamp': timestamp, 'data': data})
+
+@app.route('/hotel/<paket_id>', methods=['GET'])
+def get_hotel_by_id(paket_id):
+    cursor = mysql.connection.cursor()
+    cursor.execute("SELECT * FROM hotel.hotel WHERE paket_id = %s", (paket_id,))
+    columns = [i[0] for i in cursor.description]
+    data = []
+    for row in cursor.fetchall():
+        data.append(dict(zip(columns, row)))
     cursor.close()
     timestamp = generate_timestamp()
     return jsonify({'timestamp': timestamp, 'data': data})
@@ -39,15 +63,14 @@ def add_hotel():
     if request.method == 'POST':
         # Mengambil data dari permintaan POST
         id_hotel = request.form['id_hotel']
+        nama_hotel = request.form['nama_hotel']
         lokasi_hotel = request.form['lokasi_hotel']
         harga_sewa = request.form['harga_sewa']
-
-        # Menyimpan data gambar dari permintaan
-        foto_hotel = request.files['foto_hotel'].read()
+        paket_id = request.form['paket_id']
         
         # Menyimpan data ke dalam database
         cursor = mysql.connection.cursor()
-        cursor.execute("INSERT INTO hotel (id_hotel, lokasi_hotel, harga_sewa, foto_hotel) VALUES (%s, %s, %s, %s)", (id_hotel, lokasi_hotel, harga_sewa, foto_hotel))
+        cursor.execute("INSERT INTO hotel (id_hotel, nama_hotel, lokasi_hotel, harga_sewa, paket_id) VALUES (%s, %s, %s, %s)", (id_hotel, nama_hotel, harga_sewa, paket_id))
         mysql.connection.commit()
         cursor.close()
         
@@ -64,15 +87,14 @@ def add_hotel():
 def update_hotel(id_hotel):
     if request.method == 'PUT':
         # Mengambil data dari permintaan POST
+        nama_hotel = request.form['nama_hotel']
         lokasi_hotel = request.form['lokasi_hotel']
         harga_sewa = request.form['harga_sewa']
-        
-        # Menyimpan data gambar dari permintaan
-        foto_hotel = request.files['foto_hotel'].read()
+        paket_id = request.form['paket']
         
         # Menyimpan data ke dalam database
         cursor = mysql.connection.cursor()
-        cursor.execute("UPDATE hotel SET lokasi_hotel = %s, harga_sewa = %s, foto_hotel = %s WHERE id_hotel = %s", (lokasi_hotel, harga_sewa, foto_hotel, id_hotel))
+        cursor.execute("UPDATE hotel SET nama_hotel = %s, lokasi_hotel = %s, harga_sewa = %s, paket_id = %s WHERE id_hotel = %s", (nama_hotel, lokasi_hotel, harga_sewa, paket_id, id_hotel))
         mysql.connection.commit()
         cursor.close()
         
