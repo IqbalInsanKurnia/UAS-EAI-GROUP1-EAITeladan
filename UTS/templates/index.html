@@ -48,7 +48,7 @@
 <body>
     <div class="container">
         <h1 class="text-center mb-4">Daftar Paket Liburan</h1>
-        <div class="Daftar Paket Liburan">
+        <div class="hotel-list">
             {% for paket in paket_liburan %}
             <div class="hotel-card">
                 <h2>{{ paket.nama }}</h2>
@@ -56,6 +56,7 @@
                 <p><strong>Lokasi:</strong> {{ paket.lokasi }}</p>
                 <p><strong>Durasi:</strong> {{ paket.durasi }}</p>
                 <p><strong>Paket ID:</strong> {{ paket.paket_id }}</p>
+                <p><strong>Stock:</strong> {{ paket.stock }}</p> <!-- Menampilkan Stock -->
                 <a href="http://127.0.0.1:5009/paket/{{ paket.paket_id }}" class="btn btn-primary">Pilih Paket</a>
             </div>
             {% endfor %}

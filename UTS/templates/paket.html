@@ -6,7 +6,7 @@
     <title>Detail Paket Liburan</title>
     <!-- Bootstrap CSS -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-     <!-- Font Awesome CSS -->
+    <!-- Font Awesome CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <style>
         body {
@@ -50,33 +50,28 @@
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
         }
         .review-card {
-    background-color: #f8f9fa;
-    border-radius: 10px;
-    padding: 20px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-    transition: box-shadow 0.3s ease;
-}
-
-.review-card:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-.review-header {
-    margin-bottom: 15px;
-}
-
-.review-avatar img {
-    width: 50px;
-    height: 50px;
-}
-
-.rating {
-    color: #9e9d9d;
-}
-
-.checked {
-    color: #ffc107;
-}
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            transition: box-shadow 0.3s ease;
+        }
+        .review-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        .review-header {
+            margin-bottom: 15px;
+        }
+        .review-avatar img {
+            width: 50px;
+            height: 50px;
+        }
+        .rating {
+            color: #9e9d9d;
+        }
+        .checked {
+            color: #ffc107;
+        }
     </style>
 </head>
 <body>
@@ -91,6 +86,7 @@
                 <p><strong>Harga Paket:</strong> Rp {{ paket.harga }}</p>
                 <p><strong>Lokasi:</strong> {{ paket.lokasi }}</p>
                 <p><strong>Durasi:</strong> {{ paket.durasi }}</p>
+                <p><strong>Stock:</strong> {{ paket.stock }}</p> <!-- Menampilkan Stock -->
             </div>
         </div>
         <div class="card">
@@ -128,18 +124,14 @@
                     </div>
                     <div class="review-body">
                         <div class="rating mb-2">
-                            <div class="rating mb-2">
-                                {% for i in range(1, 6) %}
-                                    {% if i <= user.rating %}
-                                        <span class="fa fa-star checked"></span>
-                                    {% else %}
-                                        <span class="fa fa-star"></span>
-                                    {% endif %}
-                                {% endfor %}
-                            </div>
-                            
+                            {% for i in range(1, 6) %}
+                                {% if i <= user.rating %}
+                                    <span class="fa fa-star checked"></span>
+                                {% else %}
+                                    <span class="fa fa-star"></span>
+                                {% endif %}
+                            {% endfor %}
                         </div>
-                        
                         <p class="mb-1"><strong>Negara:</strong> {{ paket.lokasi }}</p>
                         <p>{{ user.ulasan }}</p>
                     </div>
@@ -147,13 +139,58 @@
                 {% endfor %}
             </div>
         </div>
-        
-        
-        <a href="http://127.0.0.1:5009/" class="btn btn-primary">Kembali ke Menu Utama</a>
-        
+
+        <div class="d-flex justify-content-between mb-4">
+            <a href="http://127.0.0.1:5009/" class="btn btn-primary">Kembali ke Menu Utama</a>
+            <a href="http://127.0.0.1:5009/" onclick="pilihPaket('{{ paket.paket_id }}')" class="btn btn-primary float-right">Pilih Paket Liburan</a>
+
+        </div>
     </div>
     <!-- Bootstrap JS (optional) -->
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <!-- Di bagian akhir file HTML, sebelum tag </body> -->
+    <script>
+        function pilihPaket(paketId) {
+            fetch(`/pilih-paket/${paketId}`, {
+                method: 'PUT'
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Tampilkan pop-up "Paket berhasil ditambahkan"
+                    alert("Paket berhasil ditambahkan!");
+                    // Redirect ke halaman utama setelah tombol OK di klik
+                    window.location.href = "http://127.0.0.1:5009/";
+                } else {
+                    throw new Error('Gagal memilih paket liburan');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
     
+
+<script>
+    function pilihPaket(paketId) {
+      fetch(`/pilih-paket/${paketId}`, {
+        method: 'PUT'
+      })
+      .then(response => {
+        if (response.ok) {
+          // Tampilkan popup "Paket Dipilih"
+          alert("Paket Dipilih!");
+          // Refresh halaman untuk memperbarui data stok
+          window.location.reload();
+        } else {
+          throw new Error('Gagal memilih paket liburan');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+    }
+  </script>
 </body>
 </html>
