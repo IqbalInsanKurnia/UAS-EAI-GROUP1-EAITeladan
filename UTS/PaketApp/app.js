@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const admin = require('firebase-admin');
 const path = require('path');
+const amqp = require('amqplib/callback_api');
 
 const app = express();
 
@@ -12,6 +13,26 @@ admin.initializeApp({
 });
 const db = admin.firestore();
 const paketRef = db.collection('paket_liburan');
+
+function sendToRabbitMQ(message) {
+  amqp.connect('amqp://localhost', function(error0, connection) {
+      if (error0) {
+          throw error0;
+      }
+      connection.createChannel(function(error1, channel) {
+          if (error1) {
+              throw error1;
+          }
+          const queue = 'paket_queue';
+
+          channel.assertQueue(queue, {
+              durable: false
+          });
+          channel.sendToQueue(queue, Buffer.from(message));
+          console.log(" [x] Sent %s", message);
+      });
+  });
+}
 
 // Middleware untuk memproses body JSON
 app.use(bodyParser.json());
@@ -129,6 +150,9 @@ app.post('/pilih/:paket_id', async (req, res) => {
     // Tangani kesalahan
     res.status(500).json({ error: error.toString() });
   }
+
+    // Mengirim pesan ke RabbitMQ
+    sendToRabbitMQ(`Paket dipilih: ${paket_id}, jumlah: ${jumlah}`);
 });
 
 

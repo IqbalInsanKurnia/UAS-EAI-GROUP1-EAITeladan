@@ -3,6 +3,7 @@ from flask_mysqldb import MySQL
 from datetime import datetime
 from werkzeug.utils import secure_filename
 from flask import request
+import pika
 
 app = Flask(__name__)
 
@@ -17,6 +18,17 @@ mysql = MySQL(app)
 # Function to generate timestamp
 def generate_timestamp():
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+def callback(ch, method, properties, body):
+    print(f"Received {body}")
+
+def start_rabbitmq_listener():
+    connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
+    channel = connection.channel()
+    channel.queue_declare(queue='hotel_queue', durable=True)  # Set durable=True
+    channel.basic_consume(queue='hotel_queue', on_message_callback=callback, auto_ack=True)
+    print('Waiting for messages. To exit press CTRL+C')
+    channel.start_consuming()
 
 # Function to get all user
 @app.route('/user', methods=['GET'])

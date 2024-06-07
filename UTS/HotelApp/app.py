@@ -4,6 +4,7 @@ from datetime import datetime
 from werkzeug.utils import secure_filename
 from flask import request
 import base64
+import pika
 
 app = Flask(__name__)
 
@@ -18,6 +19,14 @@ mysql = MySQL(app)
 # Function to generate timestamp
 def generate_timestamp():
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+#Function to hotel_queue
+def send_to_rabbitmq(message):
+    connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
+    channel = connection.channel()
+    channel.queue_declare(queue='hotel_queue', durable=True)
+    channel.basic_publish(exchange='', routing_key='hotel_queue', body=message)
+    connection.close()
 
 @app.route('/hotel', methods=['GET'])
 def get_all_hotel():
@@ -58,6 +67,9 @@ def add_hotel():
         cursor.execute("INSERT INTO hotel.hotel (id_hotel, nama_hotel, lokasi_hotel, harga_sewa, paket_id) VALUES (%s, %s, %s, %s, %s)", (id_hotel, nama_hotel, lokasi_hotel, harga_sewa, paket_id))
         mysql.connection.commit()
         cursor.close()
+
+        # Mengirim pesan ke RabbitMQ
+        send_to_rabbitmq(f"New hotel added: {id_hotel}, {nama_hotel}, {lokasi_hotel}, {harga_sewa}, {paket_id}")
         
         # Menyusun respons
         timestamp = generate_timestamp()
